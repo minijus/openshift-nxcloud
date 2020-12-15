@@ -1,0 +1,41 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: nxcloud
+  namespace: myorg-nxcloud
+spec:
+  selector:
+    matchLabels:
+      app: nxcloud
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nxcloud
+    spec:
+      containers:
+        - name: nxcloud
+          image: example-registry.myorg.com/nxprivatecloud/nxcloud:latest
+          env:
+            - name: NX_CLOUD_APP_URL
+              value: 'https://nxcloud.myorg.com'
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nxcloud
+                  key: ADMIN_PASSWORD
+            - name: LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nxcloud
+                  key: LICENSE_KEY
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          volumeMounts:
+            - name: nxcloud-data
+              mountPath: /data
+      volumes:
+        - name: nxcloud-data
+          persistentVolumeClaim:
+            claimName: nxcloud-data
